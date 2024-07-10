@@ -25,16 +25,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     // 配置身份验证管理器
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-    }
-
-    // 定义密码编码器 Bean
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 
     // 定义身份验证管理器 Bean
@@ -43,12 +39,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-
+    
     // 配置 HTTP 安全
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                .authorizeRequests().antMatchers("/auth/login").permitAll() // 登录接口无需认证
+                .authorizeRequests().antMatchers("/auth/login", "/auth/register").permitAll() // 登录接口无需认证
                 .anyRequest().authenticated() // 其他请求需要认证
                 .and()
                 .exceptionHandling().and().sessionManagement()
