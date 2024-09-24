@@ -1,21 +1,25 @@
 package com.example.demo.auth.model;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
-public class CustomUserDetails implements UserDetails{
+public class CustomUserDetails implements UserDetails {
     private User user;
 
     public CustomUserDetails(User user) {
         this.user = user;
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 返回用户的权限，可以根据实际需求修改
-        return Collections.emptyList();
+        return user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -46,10 +50,6 @@ public class CustomUserDetails implements UserDetails{
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public User getUser() {
-        return user;
     }
 }
 
