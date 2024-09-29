@@ -2,6 +2,7 @@ package com.example.demo.auth.service;
 
 import com.example.demo.auth.model.Permission;
 import com.example.demo.auth.model.Role;
+import com.example.demo.auth.repository.PermissionRepository;
 import com.example.demo.auth.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,8 @@ public class RoleService {
 
     @Autowired
     private RoleRepository roleRepository;
-
+    @Autowired
+    private PermissionRepository permissionRepository;
     public Role saveRole(Role role) {
         return roleRepository.save(role);
     }

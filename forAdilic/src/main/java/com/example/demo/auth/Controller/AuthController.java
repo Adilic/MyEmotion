@@ -13,7 +13,8 @@ import org.springframework.security.core.AuthenticationException;
 
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api")
+
 public class AuthController {
 
     @Autowired

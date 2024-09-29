@@ -44,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                .authorizeRequests().antMatchers("/auth/login", "/auth/register").permitAll() // 登录接口无需认证
+                .authorizeRequests().antMatchers("/api/login", "/api/register","/api/hello").permitAll() // 登录接口无需认证
                 .anyRequest().authenticated() // 其他请求需要认证
                 .and()
                 .exceptionHandling().and().sessionManagement()
