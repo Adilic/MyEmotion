@@ -1,8 +1,15 @@
 package com.example.demo.auth.filter;
 
+import com.example.demo.auth.model.Permission;
+import com.example.demo.auth.model.Role;
+import com.example.demo.auth.model.User;
+import com.example.demo.auth.repository.UserRepository;
 import com.example.demo.auth.service.JwtUtil;
+import com.example.demo.auth.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +22,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 // 过滤器类声明
 @Component
@@ -25,8 +36,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
-    // 处理每个请求的核心方法
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -61,6 +76,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         // 继续过滤链
         filterChain.doFilter(request, response);
-    }
+ }
+
+
 }
 

@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Integer> {
     // 可以根据需要添加自定义查询方法
+    Role findByRoleName(String roleName);
 }

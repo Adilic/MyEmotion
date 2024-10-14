@@ -39,17 +39,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-    
+
     // 配置 HTTP 安全
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                .authorizeRequests().antMatchers("/api/login", "/api/register","/api/hello").permitAll() // 登录接口无需认证
-                .anyRequest().authenticated() // 其他请求需要认证
-                .and()
-                .exceptionHandling().and().sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS); // 使用无状态会话
-        // 在用户名密码认证过滤器之前添加 JWT 过滤器
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+//                .authorizeRequests().antMatchers("/api/login", "/api/register","/api/hello","/api/role_permissions","/api/add_roles","/api/delete_role/{id}").permitAll() // 登录接口无需认证
+//                .anyRequest().authenticated() // 其他请求需要认证
+//                .and()
+//                .exceptionHandling().and().sessionManagement()
+//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS); // 使用无状态会话
+//        // 在用户名密码认证过滤器之前添加 JWT 过滤器
+//        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                .authorizeRequests()
+                .anyRequest().permitAll();
     }
 }

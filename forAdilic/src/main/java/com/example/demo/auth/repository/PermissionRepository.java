@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, Integer> {
-    // 可以根据需要添加自定义查询方法
+
 }
