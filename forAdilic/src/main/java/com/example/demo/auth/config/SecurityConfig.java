@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -14,11 +15,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-// 配置类声明
+// 設定クラスの宣言
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    // 注入过滤器和用户详细信息服务
+    // フィルターとユーザーディテールサービスのインジェクション
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
@@ -27,31 +29,44 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    // 配置身份验证管理器
+
+    // 認証マネージャーの設定
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 
-    // 定义身份验证管理器 Bean
+    // 認証マネージャーのBeanを定義
     @Override
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
 
-    // 配置 HTTP 安全
+////     HTTPセキュリティの設定
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http.csrf().disable()
+//                .authorizeRequests()
+//                .anyRequest().permitAll();
+//    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-//                .authorizeRequests().antMatchers("/api/login", "/api/register","/api/hello","/api/role_permissions","/api/add_roles","/api/delete_role/{id}").permitAll() // 登录接口无需认证
-//                .anyRequest().authenticated() // 其他请求需要认证
-//                .and()
-//                .exceptionHandling().and().sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS); // 使用无状态会话
-//        // 在用户名密码认证过滤器之前添加 JWT 过滤器
-//        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        http.cors() // CORSサポートを有効化
+                .and()
+                .csrf().disable()  // CSRFを無効化（JWTを使用しているため）
                 .authorizeRequests()
-                .anyRequest().permitAll();
+                // 公開インターフェースは認証不要
+                .antMatchers("/api/login", "/api/register").permitAll()
+                // その他のリクエストは認証が必要だが、具体的な権限はJWTによって動的に管理
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling()
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // ステートレスセッション
+
+        // JWTフィルターを追加し、ユーザー認証の前にJWTを処理
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }

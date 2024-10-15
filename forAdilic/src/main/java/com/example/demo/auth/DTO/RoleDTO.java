@@ -3,9 +3,9 @@ package com.example.demo.auth.DTO;
 import java.util.List;
 
 public class RoleDTO {
-    private int id;  // 添加 id 字段
+    private int id;
     private String roleName;
-    private List<PermissionDTO> permissions;  // 使用 List<PermissionDTO>
+    private List<PermissionDTO> permissions;
 
     public RoleDTO(int id, String roleName, List<PermissionDTO> permissions) {
         this.id = id;
@@ -13,7 +13,7 @@ public class RoleDTO {
         this.permissions = permissions;
     }
 
-    // 添加 id 的 getter 和 setter
+
     public int getId() {
         return id;
     }

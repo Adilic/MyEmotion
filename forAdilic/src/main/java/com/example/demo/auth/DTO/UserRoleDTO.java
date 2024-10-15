@@ -9,7 +9,7 @@ public class UserRoleDTO {
         this.roleName = roleName;
     }
 
-    // Getters and Setters
+
     public int getId() {
         return id;
     }

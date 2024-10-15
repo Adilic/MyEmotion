@@ -4,6 +4,7 @@ import com.example.demo.auth.DTO.AddUserDTO;
 import com.example.demo.auth.DTO.UpdateUserRolesDTO;
 import com.example.demo.auth.DTO.UserDTO;
 import com.example.demo.auth.DTO.UserRoleDTO;
+import com.example.demo.auth.model.Permission;
 import com.example.demo.auth.model.Role;
 import com.example.demo.auth.model.User;
 import com.example.demo.auth.repository.RoleRepository;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +28,7 @@ public class UserService {
     private RoleRepository roleRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    // 获取所有用户及其角色
+
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(user -> new UserDTO(
@@ -39,12 +41,12 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    // 更新用户角色的逻辑
+
     public void updateUserRoles(int userId, UpdateUserRolesDTO updateUserRolesDTO) {
-        // 获取用户
+
         User existingUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 获取新的角色集合
+
         Set<Role> updatedRoles = new HashSet<>();
         for (int roleId : updateUserRolesDTO.getRoleIds()) {
             Role role = roleRepository.findById(roleId)
@@ -52,16 +54,16 @@ public class UserService {
             updatedRoles.add(role);
         }
 
-        // 更新用户角色
+
         existingUser.setRoles(updatedRoles);
 
-        // 保存更新后的用户
+
         userRepository.save(existingUser);
     }
-    // 删除用户的逻辑
+
     public void deleteUser(int userId) {
         if (userRepository.existsById(userId)) {
-            userRepository.deleteById(userId);  // 删除用户
+            userRepository.deleteById(userId);
         } else {
             throw new RuntimeException("User not found");
         }
@@ -72,7 +74,7 @@ public class UserService {
         user.setUsername(addUserDTO.getUsername());
         user.setPassword(passwordEncoder.encode(addUserDTO.getPassword()));  // 对密码进行加密
 
-        // 获取用户选择的角色
+
         Set<Role> roles = new HashSet<>();
         for (Integer roleId : addUserDTO.getRoleIds()) {
             Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
@@ -80,11 +82,58 @@ public class UserService {
         }
         user.setRoles(roles);
 
-        // 保存新用户
+
         userRepository.save(user);
     }
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+    public List<String> getUserPermissions(String username) {
+        User user = userRepository.findByUsername(username);
+
+        if (user != null) {
+
+            System.out.println("User: " + username + " found with roles: " + user.getRoles());
+
+
+            List<String> permissions = user.getRoles().stream()
+                    .flatMap(role -> role.getPermissions().stream())  //
+                    .map(Permission::getPermissionName)
+                    .distinct()  //
+                    .collect(Collectors.toList());
+
+
+            System.out.println("User: " + username + " Permissions: " + permissions);
+
+            return permissions;
+        } else {
+            System.out.println("User not found: " + username);
+            return new ArrayList<>();
+        }
+    }
+
+
+    public List<String> getUserRoles(String username) {
+        User user = userRepository.findByUsername(username);
+
+        if (user != null) {
+
+            List<String> roles = user.getRoles().stream()
+                    .map(Role::getRoleName)
+                    .collect(Collectors.toList());
+
+
+            System.out.println("User: " + username + " Roles: " + roles);
+
+            return roles;
+        } else {
+            System.out.println("User not found: " + username);
+            return new ArrayList<>();
+        }
+    }
+
+
+
 }

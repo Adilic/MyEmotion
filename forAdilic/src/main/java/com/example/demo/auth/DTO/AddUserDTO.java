@@ -6,7 +6,7 @@ public class AddUserDTO {
 
     private String username;
     private String password;
-    private List<Integer> roleIds;  // 前端传递的角色 ID 列表
+    private List<Integer> roleIds;
 
     // Getters and Setters
     public String getUsername() {

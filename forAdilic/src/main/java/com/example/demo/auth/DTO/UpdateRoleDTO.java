@@ -5,7 +5,7 @@ import java.util.List;
 public class UpdateRoleDTO {
 
     private String roleName;
-    private List<Integer> permissionIds;  // 用于存放权限的ID列表
+    private List<Integer> permissionIds;
 
     public UpdateRoleDTO() {
     }
@@ -15,7 +15,7 @@ public class UpdateRoleDTO {
         this.permissionIds = permissionIds;
     }
 
-    // Getter 和 Setter 方法
+
     public String getRoleName() {
         return roleName;
     }

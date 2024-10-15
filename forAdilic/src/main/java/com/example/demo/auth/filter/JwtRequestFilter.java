@@ -1,5 +1,6 @@
 package com.example.demo.auth.filter;
 
+import com.example.demo.auth.model.CustomUserDetails;
 import com.example.demo.auth.model.Permission;
 import com.example.demo.auth.model.Role;
 import com.example.demo.auth.model.User;
@@ -8,6 +9,7 @@ import com.example.demo.auth.service.JwtUtil;
 import com.example.demo.auth.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,10 +29,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// 过滤器类声明
+// フィルタークラスの宣言
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-    // 依赖注入
+    // 依存関係の注入
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -41,43 +43,51 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private UserRepository userRepository;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // 从请求头中提取 JWT
         String authorizationHeader = request.getHeader("Authorization");
         String username = null;
         String jwtToken = null;
 
-        // 检查 JWT 是否存在并以 "Bearer " 开头
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwtToken = authorizationHeader.substring(7); // 提取 JWT 部分
-            try {
-                // 从 JWT 中提取用户名
-                username = jwtUtil.extractUsername(jwtToken);
-            } catch (Exception e) {
-                // 处理提取过程中可能的异常
-            }
+            jwtToken = authorizationHeader.substring(7);
+            username = jwtUtil.extractUsername(jwtToken);
         }
 
-        // 验证 JWT 并设置安全上下文
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            User user = userRepository.findByUsername(username);
+            if (user != null) {
+                CustomUserDetails userDetails = new CustomUserDetails(user);
+                // ユーザーの役割リストを取得
+                List<String> roles = user.getRoles().stream()
+                        .map(Role::getRoleName)
+                        .collect(Collectors.toList());
 
-            if (jwtUtil.validateToken(jwtToken, userDetails.getUsername())) {
-                // 创建认证对象并设置到安全上下文
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                // 役割ごとに権限リストを取得
+                List<String> permissions = user.getRoles().stream()
+                        .flatMap(role -> role.getPermissions().stream())  // 各役割の権限を繰り返し処理
+                        .map(Permission::getPermissionName)
+                        .collect(Collectors.toList());
+
+                // 新しいJWTを生成
+                String newJwt = jwtUtil.generateToken(userDetails, roles, permissions);
+                response.setHeader("Authorization", "Bearer " + newJwt);
+
+                // 認証情報を設定
+                setAuthentication(userDetails, request);
             }
         }
 
-        // 继续过滤链
         filterChain.doFilter(request, response);
- }
+    }
 
+    // ヘルパーメソッド：認証情報を設定
+    private void setAuthentication(UserDetails userDetails, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    }
 
 }
-

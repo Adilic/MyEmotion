@@ -4,8 +4,8 @@ import java.util.List;
 
 public class RolePermissionDTO {
 
-    private String roleName;           // 接收角色名称
-    private List<Integer> permissionIds;  // 接收权限的ID列表
+    private String roleName;
+    private List<Integer> permissionIds;
 
     // 无参构造函数
     public RolePermissionDTO() {
@@ -17,7 +17,7 @@ public class RolePermissionDTO {
         this.permissionIds = permissionIds;
     }
 
-    // Getters and Setters
+
     public String getRoleName() {
         return roleName;
     }

@@ -6,7 +6,7 @@ public class UpdateUserRolesDTO {
     private String username;
     private List<Integer> roleIds;
 
-    // Getters and Setters
+
     public String getUsername() {
         return username;
     }
